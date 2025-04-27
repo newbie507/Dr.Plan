@@ -7,7 +7,7 @@ WORKDIR /usr/local/tomcat
 # 3. 기존 webapps 디렉토리 제거 (필요한 경우)
 RUN rm -rf webapps/*
 
-# 4. JDBC 드라이버 복사
+# 4. JDBC 드라이버 복사 dltjgus
 COPY Hospital_Search_Site/src/main/webapp/WEB-INF/mysql-connector-java-5.1.49-bin.jar lib/
 
 # 5. JSP 프로젝트 복사
