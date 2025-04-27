@@ -1,0 +1,69 @@
+@charset "UTF-8";
+@import url(https://fonts.googleapis.com/earlyaccess/jejugothic.css);
+@import url(https://fonts.googleapis.com/earlyaccess/nanumgothic.css);
+.navbar-brand, h1, h2, h3, h4, h5 {
+	font-family: 'Jeju Gothic';
+	font-size: 18px;
+}
+
+body{
+	font-family: 'Nanum Gothic';
+}
+
+/* 네비바 아래 박스 */
+.box1{
+	background-color: rgb(52,152,219);
+	width: 100%;
+	height: 80px;
+}
+
+/* 검색 */
+.search{
+	text-align: center;
+	position: relative;
+}
+
+.Mainsearch{
+	border: 2px solid rgb(215, 215, 215);
+	display: inline-flex;
+	background: rgb(246, 246, 246);
+	border-radius: 30px;
+	padding: 5px;
+	width: 450px;
+}
+.searchBar{
+	background: rgb(246, 246, 246);
+	border: 0;
+	outline: 0;
+	overflow: visible;
+}
+.icon{
+	background: rgb(246, 246, 246);
+	border: 0;
+	width: 40px;
+	font-size: 20px;
+	color: rgb(215, 215, 215);
+  transition-property:color;
+  transition-duration:0.5s;
+}
+.icon:hover{
+	color: black;
+}
+
+/*마이페이지 개인정보 관리 비밀번호 보이기 토글*/
+#passwordCheck{
+	position: relative;
+}
+#passwordCheck i{
+	position: absolute;
+    left: 85%;
+    top: 18px;
+}
+
+.nav-label {
+	font-family: 'Jeju Gothic', sans-serif;
+	font-size: 18px;
+	font-weight: 600;
+	color: #212529;
+  }
+  
