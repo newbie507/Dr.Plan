@@ -11,15 +11,15 @@ jobs:
       - name: Checkout source code
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials for Seoul
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      - name: Login to Amazon ECR
-        id: login-ecr
+      - name: Login to Seoul ECR
+        id: login-ecr-seoul
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Get image tag (version)
@@ -29,10 +29,9 @@ jobs:
           echo VERSION=$VERSION
           echo "::set-output name=version::$VERSION"
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: image-info
+      - name: Build, tag, and push to Seoul ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REGISTRY: ${{ steps.login-ecr-seoul.outputs.registry }}
           ECR_REPOSITORY: drplan
           IMAGE_TAG: ${{ steps.image.outputs.version }}
         run: |
@@ -40,6 +39,28 @@ jobs:
           echo "::set-output name=image_tag::$IMAGE_TAG"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # 추가: 싱가폴 리전 연결
+      - name: Configure AWS credentials for Singapore
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+
+      - name: Login to Singapore ECR
+        id: login-ecr-singapore
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Tag and Push to Singapore ECR
+        env:
+          SOURCE_ECR_REGISTRY: ${{ steps.login-ecr-seoul.outputs.registry }}
+          DEST_ECR_REGISTRY: ${{ steps.login-ecr-singapore.outputs.registry }}
+          ECR_REPOSITORY: drplan
+          IMAGE_TAG: ${{ steps.image.outputs.version }}
+        run: |
+          docker tag $SOURCE_ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $DEST_ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $DEST_ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Setup Kustomize
         uses: imranismail/setup-kustomize@v1
@@ -54,11 +75,11 @@ jobs:
 
       - name: Update Kubernetes resources
         run: |
-          echo ${{ steps.login-ecr.outputs.registry }}
-          echo ${{ steps.image-info.outputs.ecr_repository }}
-          echo ${{ steps.image-info.outputs.image_tag }}
+          echo ${{ steps.login-ecr-seoul.outputs.registry }}
+          echo ${{ steps.image.outputs.ecr_repository }}
+          echo ${{ steps.image.outputs.image_tag }}
           cd manifests
-          kustomize edit set image ${{ steps.login-ecr.outputs.registry }}/${{ steps.image-info.outputs.ecr_repository }}=${{ steps.login-ecr.outputs.registry }}/${{ steps.image-info.outputs.ecr_repository }}:${{ steps.image-info.outputs.image_tag }}
+          kustomize edit set image ${{ steps.login-ecr-seoul.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}=${{ steps.login-ecr-seoul.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}:${{ steps.image.outputs.image_tag }}
           cat kustomization.yaml
 
       - name: Commit files
