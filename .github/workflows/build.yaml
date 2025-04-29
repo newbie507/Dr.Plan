@@ -47,7 +47,7 @@ jobs:
       - name: Checkout kustomize repository
         uses: actions/checkout@v2
         with:
-          repository: newbie507/manifests
+          repository: newbie507/AWSmanifests
           ref: main
           token: ${{ secrets.ACTION_TOKEN }}
           path: manifests
