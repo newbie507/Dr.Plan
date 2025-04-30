@@ -32,7 +32,7 @@ jobs:
       - name: Build, tag, and push to Seoul ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr-seoul.outputs.registry }}
-          ECR_REPOSITORY: drplan
+          ECR_REPOSITORY: drplan-ecr-seoul-repo
           IMAGE_TAG: ${{ steps.image.outputs.version }}
         run: |
           echo "::set-output name=ecr_repository::$ECR_REPOSITORY"
