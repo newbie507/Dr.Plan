@@ -75,6 +75,7 @@ jobs:
         run: |
           echo "✅ Updating kustomization.yaml"
           cd manifests
+          kustomize edit clear images
           kustomize edit set image ${{ steps.login-ecr-seoul.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}=${{ steps.login-ecr-seoul.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}:${{ steps.image.outputs.version }}
           cat kustomization.yaml
 
@@ -105,6 +106,7 @@ jobs:
         run: |
           echo "✅  Updating kustomization.yaml"
           cd manifests
+          kustomize edit clear images
           kustomize edit set image ${{ steps.login-ecr-singapore.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}=${{ steps.login-ecr-singapore.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}:${{ steps.image.outputs.version }}
           cat kustomization.yaml
 
