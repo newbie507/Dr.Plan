@@ -66,7 +66,7 @@ jobs:
       - name: Checkout kustomize repository
         uses: actions/checkout@v2
         with:
-          repository: newbie507/AWSmanifests
+          repository: newbie507/AWS_Seoul_manifests
           ref: main
           token: ${{ secrets.ACTION_TOKEN }}
           path: manifests
@@ -79,6 +79,36 @@ jobs:
           cat kustomization.yaml
 
       - name: Commit files if changed
+        run: |
+          cd manifests
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "dltjgusdltjgus"
+          if ! git diff --quiet; then
+            git commit -am "update image tag to ${{ steps.image.outputs.version }}"
+            git push
+          else
+            echo " No changes to commit"
+          fi
+
+      - name: Setup Kustomize singapore
+        uses: imranismail/setup-kustomize@v1
+
+      - name: Checkout kustomize repository
+        uses: actions/checkout@v2
+        with:
+          repository: newbie507/AWS_Singapore_manifests
+          ref: main
+          token: ${{ secrets.ACTION_TOKEN }}
+          path: manifests
+
+      - name: Update Kubernetes resources
+        run: |
+          echo "✅  Updating kustomization.yaml"
+          cd manifests
+          kustomize edit set image ${{ steps.login-ecr-singapore.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}=${{ steps.login-ecr-singapore.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}:${{ steps.image.outputs.version }}
+          cat kustomization.yaml
+
+      - name: Commit files if changed singapore
         run: |
           cd manifests
           git config --global user.email "github-actions@github.com"
