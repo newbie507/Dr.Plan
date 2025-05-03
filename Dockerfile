@@ -1,5 +1,5 @@
 # 1단계: Tomcat 9 + OpenJDK11 기반의 Alpine 이미지 사용 (경량화 목적)
-FROM tomcat:9.0.87-jdk11-temurin-alpine
+FROM tomcat:9.0.87-jdk11-temurin
 
 # 2단계: 작업 디렉토리 설정
 WORKDIR /usr/local/tomcat
