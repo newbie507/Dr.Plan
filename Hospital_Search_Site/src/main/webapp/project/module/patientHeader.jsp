@@ -11,8 +11,8 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="index.jsp" style="margin-right: 40px">
-      <img src="img/logo.png" class="img-responsive" alt="로고" width="100px" height="80px">
+    <a class="navbar-brand" href="main.jsp" style="margin-right: 40px">
+      <img src="img/logo.png" class="img-responsive" alt="로고" width="80px" height="80px">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
             data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -59,7 +59,6 @@
     </div>
   </div>
 </nav>
-
 <div class="box1"></div>
 </body>
 </html>

@@ -8,7 +8,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
   <div class="container-fluid">
-    <a class="navbar-brand" href="PageControl.jsp?hosAction=search" style="margin-right: 40px"><img src="img/logo.png" class="img-responsive" alt="로고" width="100px" height="80px"></a>
+    <a class="navbar-brand" href="PageControl.jsp?hosAction=search" style="margin-right: 40px"><img src="img/logo.png" class="img-responsive" alt="로고" width="80px" height="80px"></a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -37,6 +37,6 @@
     </div>
   </div>
 </nav>
-<div class="box1" style="background-color: rgb(52,152,219);"></div>
+<div class="box1"></div>
 </body>
 </html>

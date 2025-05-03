@@ -108,22 +108,8 @@
 </div>
 
 <!-- 예약 정보 전달 -->
-<script>
-function transParam(dutyName, hpid) {
-  $("#namehospital").val(dutyName);
-  $("#exampleModalLabel").text(dutyName);
-}
-</script>
 
-<!-- 달력 활성화 -->
 <script>
-$(function() {
-  $("#reservedate").datepicker({
-    dateFormat: "yy-mm-dd",
-    minDate: 0
-  });
-});
-
 function transParam(dutyName, dgidIdName, hpid) {
   $("#namehospital").val(dutyName);
   $("#exampleModalLabel").text(dutyName);

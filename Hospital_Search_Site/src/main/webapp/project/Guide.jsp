@@ -64,23 +64,34 @@ table {
  %>
 <div><br>
 <font class="GT">Dr.Plan 이용안내</font><br><br>
-<img src="img/Guide1-1.png" class="GuidePage"><br>
-<font size="3" class="GuideText">1. 원하는 병원명과 진료과 별로 검색을 해보세요.</font><br>
-<font size="3" class="GuideText">↓</font><br>
-<img src="img/Guide2.png" class="GuidePage"><br>
-<font size="3" class="GuideText">2. 찾으시는 병원의 진료 여부를 확인한 후 예약 버튼을 누르세요.</font><br>
+<img src="img/Guide1.png" class="GuidePage"><br>
+<font size="3" class="GuideText">1. 찾으시는 병원의 진료 여부를 확인한 후 예약 버튼을 누르세요.</font><br>
 <font size="3" class="GuideText">↓</font><br>
 <table>
 <tr>
 <td>
-<img src="img/Guide3.png"><br>
+<img src="img/Guide2.png"><br>
 </td>
 <td>
-<img src="img/Guide4.png">
+<img src="img/Guide3.png">
 </td>
 </tr>
 </table>
-<font size="3" class="GuideText">3. 예약을 원하시는 날짜를 선택하고 필수 *를 올바르게 선택, 입력 후 예약하기 버튼을 눌러주세요.</font><br>
+<font size="3" class="GuideText">2. 예약을 원하시는 날짜를 선택하고 필수 *를 올바르게 선택, 입력 후 예약하기 버튼을 눌러주세요.</font><br>
+<font size="3" class="GuideText">↓</font><br>
+<table>
+<tr>
+<td style="text-align: center;">
+<img src="img/Guide4.png"><br>
+</td>
+</tr>
+<tr>
+<td>
+<img src="img/Guide5.png">
+</td>
+</tr>
+</table>
+<font size="3" class="GuideText">3. 마이 페이지에서 예약 목록을 확인하세요. 원치 않는 진료일 경우, 취소를 눌러 예약을 삭제하세요.</font><br>
 
 </div>
 </body>

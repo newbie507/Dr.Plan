@@ -73,17 +73,40 @@
   var patientId = '<%= (memId != null) ? memId : "no-user" %>';
   var API_BASE = "https://i0i241i959.execute-api.ap-northeast-2.amazonaws.com/reserve";
   
-  // 예약 목록 불러오기
-  function loadReservations() {
-    if (!patientId || patientId === "no-user") {
-      alert("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-      location.href = "/PatientLogin.jsp"; 
+  // ✅ 페이지 호출 로그 전송
+  fetch("logToServer.jsp?type=info&message=" + encodeURIComponent(`[INFO] 마이페이지 호출 - patientId=${patientId}`));
+
+  document.addEventListener("DOMContentLoaded", function() {
+    const accessToken = localStorage.getItem("accessToken");
+    const userId = localStorage.getItem("userId");
+
+    console.log("Access Token: ", accessToken);
+    console.log("User ID: ", userId);
+
+
+    if (!accessToken || !userId) {
+      console.warn("❗ 로그인 토큰이 없습니다. 로그인 페이지로 이동합니다.");
+      alert("로그인이 필요합니다. 다시 로그인 해주세요.");
+      window.location.href = "PatientLogin.jsp";
       return;
     }
+
+    console.log("✅ 로그인 유지 userId:", userId);
+    loadReservations(userId, accessToken);
+  });
+
+  // 예약 목록 불러오기
+  function loadReservations(userId, accessToken) {
   
-    console.log("✅ API 호출 URL: " + API_BASE + "?patientId=" + patientId);
+    console.log("✅ API 호출 URL: " + API_BASE + "?patientId=" + userId);
   
-    fetch(API_BASE + "?patientId=" + patientId)
+    fetch(API_BASE + "?accessToken=" + encodeURIComponent(accessToken), {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })
+      
       .then(function(res) {
         if (!res.ok) {
           return res.text().then(function(text) {
@@ -123,10 +146,24 @@
   
   // 예약 취소 요청
   function cancelReservation(reservationId) {
+    const accessToken = localStorage.getItem("accessToken");
+    const userId = localStorage.getItem("userId");
+    
     if (!confirm("정말 예약을 취소하시겠습니까?")) return;
-  
-    fetch(API_BASE + "?reserveId=" + reservationId, {
-      method: "DELETE"
+    if (!accessToken) {
+      alert("토큰이 만료되었습니다. 다시 로그인해주세요.");
+      window.location.href = "PatientLogin.jsp";
+      return;
+    }
+
+    // ✅ 예약 취소 시도 로그
+    fetch("logToServer.jsp?type=info&message=" + encodeURIComponent(`[INFO] 예약 취소 시도 - reserveID=${reservationId}`));
+
+    fetch(API_BASE + "?reserveId=" + reservationId + "&accessToken=" + encodeURIComponent(accessToken), {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json"
+      }
     })
     .then(function(res) {
       if (!res.ok) {
@@ -134,17 +171,23 @@
           throw new Error("삭제 실패(" + res.status + "): " + errText);
         });
       }
+
+      // ✅ 예약 취소 성공 로그
+      fetch("logToServer.jsp?type=info&message=" + encodeURIComponent(`[INFO] 예약 취소 성공 - reserveID=${reservationId}`));
+
       alert("예약이 취소되었습니다.");
-      loadReservations();
+
+      loadReservations(userId, accessToken);  
     })
     .catch(function(err) {
       console.error(err);
+
+      // ✅ 예약 취소 실패 로그
+      fetch("logToServer.jsp?type=error&message=" + encodeURIComponent(`[ERROR] 예약 취소 실패 - reserveID=${reservationId}, 에러=${err}`));
+
       alert("예약 취소 중 오류가 발생했습니다:\n" + err.message);
     });
   }
-  
-  // 초기 로딩 시 실행
-  document.addEventListener("DOMContentLoaded", loadReservations);
   </script>
   
 </body>

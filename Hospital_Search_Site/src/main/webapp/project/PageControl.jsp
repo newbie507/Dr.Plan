@@ -29,7 +29,7 @@
                 localStorage.setItem("idToken", result.idToken);
 
                 alert("로그인 성공");
-                window.location.href = "index.jsp";  // 성공 시 메인 페이지로 리디렉션
+                window.location.href = "main.jsp";  // 성공 시 메인 페이지로 리디렉션
             </script>
 <%
         } else {
@@ -44,8 +44,8 @@
         session.setAttribute("memPw", password);
         session.setAttribute("memLogin", "ok");
 
-        // ✅ index.jsp로 리다이렉션
-        response.sendRedirect("index.jsp");
+        // ✅ main.jsp로 리다이렉션
+        response.sendRedirect("main.jsp");
     }
 %>
 <%! 

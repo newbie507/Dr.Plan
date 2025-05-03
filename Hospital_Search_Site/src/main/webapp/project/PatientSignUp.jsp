@@ -29,14 +29,14 @@
       <label for="userId" class="form-label">E-mail</label>
       <div class="d-flex">
         <input type="email" class="form-control" id="userId" required>
-        <button type="button" class="btn btn-outline-secondary" onclick="sendEmailVerification()">이메일 인증</button>
+        <button type="button" class="btn btn-outline-success ms-2" id="emailVerifyBtn" disabled style="white-space: nowrap;" onclick="sendEmailVerification()">이메일 인증</button>
       </div>
     </div>
     <div class="mb-3">
       <label for="verifyCode" class="form-label">인증 코드</label>
       <div class="d-flex">
         <input type="text" class="form-control me-2" id="verifyCode" placeholder="인증 코드를 입력하세요">
-        <button type="button" class="btn btn-outline-success" onclick="verifyEmailCode()">확인</button>
+        <button type="button" class="btn btn-outline-success" id="verifyCodeBtn" disabled style="white-space: nowrap;" onclick="verifyEmailCode()">인증 확인</button>
       </div>
     </div>
     <div class="mb-3">
@@ -91,6 +91,33 @@
 <jsp:include page="module/footer.jsp" flush="false" />
 
 <script>
+// 이메일 형식 실시간 검사 및 버튼 제어
+document.getElementById("userId").addEventListener("input", function () {
+  const emailInput = this;
+  const verifyBtn = document.getElementById("emailVerifyBtn");
+
+  const isValidEmail = emailInput.checkValidity();
+
+  if (isValidEmail) {
+    verifyBtn.disabled = false;
+    emailInput.classList.remove("is-invalid");
+  } else {
+    verifyBtn.disabled = true;
+    emailInput.classList.add("is-invalid");
+  }
+});
+
+document.getElementById("verifyCode").addEventListener("input", function () {
+  const codeInput = this;
+  const verifyBtn = document.getElementById("verifyCodeBtn");
+
+  if (codeInput.value.trim().length > 0) {
+    verifyBtn.disabled = false;
+  } else {
+    verifyBtn.disabled = true;
+  }
+});
+
 function sample6_execDaumPostcode() {
   new daum.Postcode({
     oncomplete: function(data) {
