@@ -57,7 +57,7 @@ jobs:
           repository: newbie507/AZURE_Seoul_manifests
           ref: main
           token: ${{ secrets.ACTION_TOKEN }}
-          path: manifests-azure
+          path: AZURE_Seoul_manifests
 
       # 9. kustomization.yaml 이미지 업데이트
       - name: Update Kubernetes resources (Azure)
