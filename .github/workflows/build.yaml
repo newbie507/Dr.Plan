@@ -54,7 +54,7 @@ jobs:
       - name: Checkout kustomize repository (Azure)
         uses: actions/checkout@v2
         with:
-          repository: newbie507/Azure_manifests
+          repository: newbie507/AZURE_Seoul_manifests
           ref: main
           token: ${{ secrets.ACTION_TOKEN }}
           path: manifests-azure
@@ -62,7 +62,7 @@ jobs:
       # 9. kustomization.yaml 이미지 업데이트
       - name: Update Kubernetes resources (Azure)
         run: |
-          cd manifests-azure
+          cd AZURE_Seoul_manifests
           kustomize edit clear images
           kustomize edit set image ${{ secrets.ACR_LOGIN_SERVER }}/drplan-acr-repo:${{ steps.image.outputs.version }}
           cat kustomization.yaml
