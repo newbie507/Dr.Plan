@@ -64,7 +64,7 @@ jobs:
         run: |
           cd AZURE_Seoul_manifests
           kustomize edit clear images
-          kustomize edit set image ${{ secrets.ACR_LOGIN_SERVER }}/drplan-acr-repo:${{ steps.image.outputs.version }}
+          kustomize edit set image ${{ secrets.ACR_LOGIN_SERVER }}/drplan-app:${{ steps.image.outputs.version }}
           cat kustomization.yaml
 
       # 10. 변경된 파일 커밋 & 푸시 (Azure)
