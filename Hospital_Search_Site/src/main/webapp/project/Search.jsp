@@ -12,7 +12,7 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <link rel="stylesheet" href="./css/custom.css">
   <script src="https://kit.fontawesome.com/7f5811a0ff.js" crossorigin="anonymous"></script>
-  <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ab2bc5c24540617e4235c668b239cd7e&libraries=services"></script>
+  <script async defer src="//dapi.kakao.com/v2/maps/sdk.js?appkey=ab2bc5c24540617e4235c668b239cd7e&libraries=services"></script>
 </head>
 
 <body>
