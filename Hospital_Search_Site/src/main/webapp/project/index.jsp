@@ -1,7 +1,14 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"%>
+<%@ page language="java"
+         contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"
+         session="true" %>
 <%
-    String memLogin = (String) session.getAttribute("memLogin");
+    // 디버그용: 세션 ID와 로그인 상태 확인
+    out.println("<!-- 세션 ID: " + session.getId() + " -->");
+    out.println("<!-- memLogin: " + session.getAttribute("memLogin") + " -->");
 
+    // 로그인 상태에 따라 헤더 분기
+    String memLogin = (String) session.getAttribute("memLogin");
     if ("ok".equals(memLogin)) {
 %>
     <jsp:include page="module/patientHeader.jsp" flush="false" />
