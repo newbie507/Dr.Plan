@@ -9,7 +9,7 @@
         String password = request.getParameter("password");
 
         String jsonBody = String.format("{\"id\":\"%s\", \"password\":\"%s\"}", id, password);
-        String endpoint = "https://i0i241i959.execute-api.ap-northeast-2.amazonaws.com/user/login";
+        String endpoint = "https://8e36s31r5f.execute-api.ap-northeast-2.amazonaws.com/prod/cognito-login";
 
         String result = callApi(endpoint, "POST", jsonBody);
 
