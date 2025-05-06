@@ -70,7 +70,7 @@ jobs:
       # 10. 변경된 파일 커밋 & 푸시 (Azure)
       - name: Commit and Push changes
         run: |
-          cd manifests-azure
+          cd AZURE_Seoul_manifests
           git config --global user.email "github-actions@github.com"
           git config --global user.name "github-actions"
           if ! git diff --quiet; then
