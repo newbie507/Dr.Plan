@@ -14,32 +14,40 @@
         String result = callApi(endpoint, "POST", jsonBody);
 
         if (result.contains("\"success\":true")) {
+            session.setAttribute("memId", id);
+            session.setAttribute("memPw", password);
+            session.setAttribute("memLogin", "ok"); // 로그인 상태 설정
 %>
             <script>
-                const resultString = `<%= result %>`;  // JSON 문자열로 그대로 전달
-                const result = JSON.parse(resultString);  // JavaScript 객체로 파싱
+                // JSP에서 반환된 JSON을 JavaScript로 처리하기 위해 안전하게 변환
+                const resultString = "<%= result %>"; // JSP 변수 그대로 전달
+                const result = JSON.parse(resultString);  // JSON 문자열을 JavaScript 객체로 변환
 
                 // 로컬스토리지에 사용자 정보 저장
                 localStorage.setItem("userId", "<%= id %>");
                 localStorage.setItem("accessToken", result.accessToken);
                 localStorage.setItem("idToken", result.idToken);
-                localStorage.setItem("refreshToken", result.refreshToken);
 
-                alert("로그인 성공! ✨");
-                window.location.href = "index.jsp";
+                alert("로그인 성공");
+                window.location.href = "main.jsp";  // 성공 시 메인 페이지로 리디렉션
             </script>
 <%
         } else {
-%>
-            <script>
-                alert("❌ 로그인 실패. 아이디 또는 비밀번호를 확인하세요.");
-                history.back();
-            </script>
-<%
+            out.println("<script>alert('로그인 실패'); history.back();</script>");
         }
+    } else if ("sessionOnly".equals(action)) {
+        // JavaScript로 넘어온 세션 설정용 요청
+        String id = request.getParameter("id");
+        String password = request.getParameter("password");
+
+        session.setAttribute("memId", id);
+        session.setAttribute("memPw", password);
+        session.setAttribute("memLogin", "ok");
+
+        // ✅ main.jsp로 리다이렉션
+        response.sendRedirect("main.jsp");
     }
 %>
-
 <%! 
 // API 호출 공통 함수
 public String callApi(String endpoint, String method, String body) throws Exception {
