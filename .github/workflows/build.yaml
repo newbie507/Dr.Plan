@@ -1,4 +1,5 @@
-name: Build JSP Web (Azure)
+# 전체
+name: Build JSP Web Multi-Region & Azure
 
 on:
   push:
@@ -8,36 +9,155 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # 1. 소스 코드 체크아웃
+      # 1. 소스 코드 체크아웃 (기본 프로젝트)
       - name: Checkout source code
         uses: actions/checkout@v2
 
-      # 2. Azure 로그인 (Service Principal 사용)
-      - name: Azure Login
-        uses: azure/login@v2
+      # ===================== AWS 서울 배포 =====================
+      # 2. AWS 서울 자격 증명 설정 (ap-northeast-2)
+      - name: Configure AWS credentials for Seoul
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
 
-      # 3. Azure 구독 설정 (필수)
-      - name: Set Azure subscription
-        run: az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # 3. 서울 ECR 로그인
+      - name: Login to Seoul ECR
+        id: login-ecr-seoul
+        uses: aws-actions/amazon-ecr-login@v1
 
-      # 4. ACR 로그인 (Docker Login Action 사용)
-      - name: Login to Azure Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ${{ secrets.ACR_LOGIN_SERVER }}   # ex: drplanacr.azurecr.io
-          username: ${{ secrets.ACR_USERNAME }}       # ACR 관리자 사용자명
-          password: ${{ secrets.ACR_PASSWORD }}       # ACR 관리자 암호
-
-      # 5. 이미지 태그 생성
+      # 4. 이미지 태그 및 리포지터리명 생성
       - name: Generate image tag
         id: image
         run: |
           VERSION=$(echo "${GITHUB_SHA}" | cut -c1-8)-$(date +%s)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "ecr_repository=drplan-ecr-seoul-repo" >> $GITHUB_OUTPUT
 
-      # 6. Docker 이미지 빌드 & ACR에 푸시
+      # 5. JSP 이미지 빌드 & 서울 ECR에 푸시
+      - name: Build, tag, and push to Seoul ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr-seoul.outputs.registry }}
+          ECR_REPOSITORY: ${{ steps.image.outputs.ecr_repository }}
+          IMAGE_TAG: ${{ steps.image.outputs.version }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      # ===================== AWS 싱가폴 배포 =====================
+      # 6. AWS 싱가폴 자격 증명 설정 (ap-southeast-1)
+      - name: Configure AWS credentials for Singapore
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-southeast-1
+
+      # 7. 싱가폴 ECR 로그인
+      - name: Login to Singapore ECR
+        id: login-ecr-singapore
+        uses: aws-actions/amazon-ecr-login@v1
+
+      # 8. 서울 이미지를 싱가폴용으로 태깅 & 푸시
+      - name: Tag and push to Singapore ECR
+        env:
+          SOURCE_IMAGE: ${{ steps.login-ecr-seoul.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}:${{ steps.image.outputs.version }}
+          SG_REGISTRY: ${{ steps.login-ecr-singapore.outputs.registry }}
+          SG_REPOSITORY: drplan-ecr-singapore-repo
+          IMAGE_TAG: ${{ steps.image.outputs.version }}
+        run: |
+          docker tag $SOURCE_IMAGE $SG_REGISTRY/$SG_REPOSITORY:$IMAGE_TAG
+          docker push $SG_REGISTRY/$SG_REPOSITORY:$IMAGE_TAG
+
+      # ===================== 서울 Kustomize repo 업데이트 =====================
+      - name: Setup Kustomize
+        uses: imranismail/setup-kustomize@v1
+
+      # 9. 서울 manifest 레포지토리 체크아웃
+      - name: Checkout kustomize repository (Seoul)
+        uses: actions/checkout@v2
+        with:
+          repository: newbie507/AWS_Seoul_manifests
+          ref: main
+          token: ${{ secrets.ACTION_TOKEN }}
+          path: manifests-seoul
+
+      # 10. 서울 kustomization.yaml 이미지 업데이트
+      - name: Update Kubernetes resources (Seoul)
+        run: |
+          cd manifests-seoul
+          kustomize edit clear images
+          kustomize edit set image ${{ steps.login-ecr-seoul.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}=${{ steps.login-ecr-seoul.outputs.registry }}/${{ steps.image.outputs.ecr_repository }}:${{ steps.image.outputs.version }}
+          cat kustomization.yaml
+
+      # 11. 변경된 파일 커밋 & 푸시 (Seoul)
+      - name: Commit files if changed (Seoul)
+        run: |
+          cd manifests-seoul
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "dltjgusdltjgus"
+          if ! git diff --quiet; then
+            git commit -am "update image tag to ${{ steps.image.outputs.version }}"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      # ===================== 싱가폴 Kustomize repo 업데이트 =====================
+      - name: Setup Kustomize (Singapore)
+        uses: imranismail/setup-kustomize@v1
+
+      # 12. 싱가폴 manifest 레포지토리 체크아웃
+      - name: Checkout kustomize repository (Singapore)
+        uses: actions/checkout@v2
+        with:
+          repository: newbie507/AWS_Singapore_manifests
+          ref: main
+          token: ${{ secrets.ACTION_TOKEN }}
+          path: manifests-singapore
+
+      # 13. 싱가폴 kustomization.yaml 이미지 업데이트
+      - name: Update Kubernetes resources (Singapore)
+        run: |
+          cd manifests-singapore
+          kustomize edit clear images
+          kustomize edit set image ${{ steps.login-ecr-singapore.outputs.registry }}/drplan-ecr-singapore-repo=${{ steps.login-ecr-singapore.outputs.registry }}/drplan-ecr-singapore-repo:${{ steps.image.outputs.version }}
+          cat kustomization.yaml
+
+      # 14. 변경된 파일 커밋 & 푸시 (Singapore)
+      - name: Commit files if changed (Singapore)
+        run: |
+          cd manifests-singapore
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "dltjgusdltjgus"
+          if ! git diff --quiet; then
+            git commit -am "update image tag to ${{ steps.image.outputs.version }}"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      # ===================== Azure 서울 배포 =====================
+      # 15. Azure 로그인 (Service Principal 사용)
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # 16. Azure 구독 설정
+      - name: Set Azure subscription
+        run: az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      # 17. ACR 로그인 (Docker Login Action)
+      - name: Login to Azure Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.ACR_LOGIN_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # 18. Docker 이미지 빌드 & ACR에 푸시
       - name: Build and Push image to Azure ACR
         env:
           ACR_LOGIN_SERVER: ${{ secrets.ACR_LOGIN_SERVER }}
@@ -46,11 +166,7 @@ jobs:
           docker build -t $ACR_LOGIN_SERVER/drplan-app:$IMAGE_TAG .
           docker push $ACR_LOGIN_SERVER/drplan-app:$IMAGE_TAG
 
-      # 7. Kustomize 설치
-      - name: Setup Kustomize
-        uses: imranismail/setup-kustomize@v1
-
-      # 8. Azure manifest 레포지토리 체크아웃
+      # 19. Azure manifest 레포지토리 체크아웃
       - name: Checkout kustomize repository (Azure)
         uses: actions/checkout@v2
         with:
@@ -59,7 +175,7 @@ jobs:
           token: ${{ secrets.ACTION_TOKEN }}
           path: AZURE_Seoul_manifests
 
-      # 9. kustomization.yaml 이미지 업데이트
+      # 20. Azure kustomization.yaml 이미지 업데이트
       - name: Update Kubernetes resources (Azure)
         run: |
           cd AZURE_Seoul_manifests
@@ -67,8 +183,8 @@ jobs:
           kustomize edit set image ${{ secrets.ACR_LOGIN_SERVER }}/drplan-app:${{ steps.image.outputs.version }}
           cat kustomization.yaml
 
-      # 10. 변경된 파일 커밋 & 푸시 (Azure)
-      - name: Commit and Push changes
+      # 21. 변경된 파일 커밋 & 푸시 (Azure)
+      - name: Commit and Push changes (Azure)
         run: |
           cd AZURE_Seoul_manifests
           git config --global user.email "github-actions@github.com"
@@ -79,3 +195,4 @@ jobs:
           else
             echo "No changes to commit"
           fi
+
